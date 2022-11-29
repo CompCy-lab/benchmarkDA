@@ -1,0 +1,177 @@
+---
+output:
+  bookdown::pdf_document2:
+    keep_tex: yes
+    toc: false
+    extra_dependencies: ['float']
+bibliography: milo_supplement.bib
+csl: cell-numeric.csl
+link-citations: true
+geometry: margin=1cm
+header-includes:
+  \usepackage{float}
+  \floatplacement{figure}{H}
+---
+
+<!-- ```{r, include=FALSE} -->
+<!-- knitr::opts_chunk$set(fig.pos = "!H", out.extra = "") -->
+<!-- ``` -->
+
+<!-- \usepackage{float}  -->
+\renewcommand{\figurename}{Supplementary Figure}
+\renewcommand{\tablename}{Supplementary Table}
+\pagenumbering{gobble}
+
+\newpage 
+
+# Supplementary Figures {-}
+
+```{r sup-fig-refined,  fig.cap="(ref:sup-fig-refined)", echo=FALSE, out.width = "500px"}
+knitr::include_graphics("suppl_figs/suppl_fig_refined.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-refined) **Random sampling of KNN graph vertices is suboptimal compared to sampling with refinement.**
+(A) Sampling with refinement leads to selection of fewer neighbourhoods 
+(B) Sampling with refinement leads to selection of bigger neighbourhoods for DA testing, independently of the initial proportion of cells sampled
+(C) Sampling with refinement generates robust neighbourhoods across initializations: for each index cell we calculate the distance from the closest index in a sampling with different initialization. The cumulative distribution of distances to the closest index is shown. The black dotted line denotes the distribution of distances between K nearest neighbours in the dataset (K=30) (NH: neighbourhood). 
+Neighbourhood statistics were calculated using a simulated trajectory dataset of 5000 cells. All plots show results from three sampling initializations for each proportion.
+
+```{r sup-fig-clustering,  fig.cap="(ref:sup-fig-clustering)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_clustering.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-clustering) **Graph-clustering does not faithfully capture simulated groups and differentially abundant subpopulations in a simulated continuous trajectory.**
+(A) A simulated linear trajectory of 2000 single-cells generated from 5 different groups, with cells assigned to either condition ‘A’ (left) or condition ‘B’ (right).
+(B) A Walktrap clustering of the data in (A) using the same KNN graph. Cells are coloured by Walktrap cluster identity.
+(C) A Louvain clustering of the data in (A) using the same KNN graph. Cells are coloured by the Louvain clustering identity.
+(D-E) Heatmaps comparing the numbers of cells in each cluster with respect to the ground truth groups in (A). Each entry in the heatmap is coloured by the proportion of cells from the column groups (ground truth) that are assigned to the respective cluster.
+
+<!-- ```{r sup-fig-bm-threshold,  fig.cap="(ref:sup-fig-bm-threshold)", echo=FALSE} -->
+<!-- knitr::include_graphics("suppl_figs/suppl_fig_bm_threshold.pdf", auto_pdf = TRUE) -->
+<!-- ``` -->
+
+<!-- (ref:sup-fig-bm-threshold) **Selection of probability threshold for DA benchmarking.** Mean True Positive Rate (left) and False Discovery Rate (right) for recovery of cells in simulated DA regions as a function of probability threshold $t$ picked to define true DA. The dashed line indicates $t = 0.6$, that was selected for benchmarking analyses. The mean is calculated over simulations on 8 populations. Line shading indicates the standard deviation of the mean. -->
+
+
+```{r sup-fig-bm-threshold,  fig.cap="(ref:sup-fig-bm-threshold)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_pC1_histograms.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-threshold) **Selection of probability threshold to define ground-truth DA regions** 
+(A) Histograms of P(C1) for cells from _all_ the simulations for each continuous dataset topology. The dotted lines indicate 25%, 50%, 75%, 90% and 95% quantiles. The red dotted line indicates the 75% quantile, that was chosen as the threshold $t$ to define the DA region. The value of the threshold $t$ is indicated in red.
+(B) Histograms of P(C1) for cells predicted to be in DA regions by different methods in _all_ the simulations on datasets of different topologies. Cells are split by the predicted direction of the effect inferred by DA methods, where NegLFC indicates predicted negative log-fold change (true positives) and PosLFC indicates predicted positive log-Fold Change (false positives). The dotted line indicates the threshold used to define the true DA region, corresponding to the 75% quantile of all P(C1) values.
+
+
+```{r sup-fig-bm-simulations,  fig.cap="(ref:sup-fig-bm-simulations)",  out.width = "500px", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_bm_simulations.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-simulations) **Benchmarking DA methods on simulated data.** DA analysis performance on KNN graphs from simulated datasets of different topologies: (A) discrete clusters (2700 cells, 3 populations);  (B) 1-D linear trajectory (7500 cells, 7 populations); (C) Branching trajectory (7500 cells, 10 populations).
+
+```{r sup-fig-bm-signal,  fig.cap="(ref:sup-fig-bm-signal)",  out.width = "500px", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_signal2noise.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-signal) **Sensitivity of DA methods to low fold change in abundance**
+(A) True positive rate (TPR, top) and false positive rate (FPR, bottom) of DA methods calculated on cells in different bins of P(C1) used to generate condition labels (bin size = 0.05, the number on the x-axis indicates the lower value in the bin). The results for 36 simulations on 2 representative populations (colors) are shown. The filled points indicate the mean of each P(C1) bin.
+(B) Variability in Milo power is explained by the fraction of true positive cells close to the DA threshold for definition of ground truth. Example distributions of P(C1) for cells detected as true positives (TP) or false negatives (FN) by Milo. Examples for simulations on 2 populations (rows) and 3 simulated fold changes (columns) are shown. 
+
+
+```{r sup-fig-bm-size,  fig.cap="(ref:sup-fig-bm-size)",  out.width = "500px", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_bm_size.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-size) **DA testing power increases with the size of the DA population.** True Positive Rate (TPR) of DA detection for simulated DA regions of increasing size centred at the same centroid (Erythroid2 (A) and Caudal neuroectoderm (B)). Results for 3 condition simulations per population and fold change are shown.
+
+
+```{r sup-fig-bm-meld,  fig.cap="(ref:sup-fig-bm-meld)", out.width = "500px",echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_meldVSmilo.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-meld) **Comparison of Milo and MELD for abundance fold change estimation.** (A-D) Scatter-plots of the true fold change at the neighbourhood index against the fold change estimated by Milo (A,C) and MELD (B,D), without batch effect (A-B) and with batch effect (magnitude = 0.5) (C-D), where $LFC = log(p_{c'}/(1 - p_{c'}))$. The neighbourhoods overlapping true DA cells ($p_{c'}$ greater than the 75% quantile of P(C1) in the mouse gastrulation dataset) are highlighted in red. (E-F) Mean Squared Error (MSE) comparison for MELD and Milo for true negative neighbourhood (E) and true positive neighbourhoods (F), with increasing simulated log-Fold Change and magnitude of batch effect.
+
+```{r sup-fig-msek,  fig.cap="(ref:sup-fig-msek)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_MSE-k_vs_replicates.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-msek) **The impact of replication and k selection on effect size estimation variance.** (A) A UMAP of the mouse thymus data with a single simulated DA. Points are single cells coloured by the P(Condition 1). (B) Increasing the number of replicates reduces the difference between the true simulated and estimated effect sizes, using the mean squared error (MSE; top panel) and increases the testing true positive rate (TPR; bottom panel). (C) Increasing k marginally reduces the estimation variance (top panel), and has less of an impact on power (bottom panel) compared to increased replication.
+ 
+```{r sup-fig-bm-mnn,  fig.cap="(ref:sup-fig-bm-mnn)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_bm_MNN.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-mnn) **In silico batch correction enhances the performance of DA methods in the presence of batch effects.** Comparison of performance of DA methods with no batch effect, with batch effects of increasing magnitude corrected with MNN, and uncorrected batch effects.  
+
+
+```{r sup-fig-bm-batch,  fig.cap="(ref:sup-fig-bm-batch)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_bm_batch.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-batch) **Batch effect control across DA effect sizes.** True Positive Rate (TPR, left) and False Discovery Rate (FDR, right) for recovery of cells in simulated DA regions for DA populations with increasing batch effect magnitude on the mouse gastrulation dataset. For each boxplot, results from 8 populations and 3 condition simulations per population are shown. Each panel represents a different DA method and a different simulated log-Fold Change.
+ 
+
+```{r sup-fig-bm-design,  fig.cap="(ref:sup-fig-bm-design)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_bm_design.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-bm-design) **Regressing out the batch covariate in NB-GLM testing leads to improved performance of Milo in the presence of batch effects** Comparison of Milo performance _with_ (~ batch + condition) or _without_ (~ condition) accounting for the simulated batch in the NB-GLM. For each boxplot, results from 8 populations, simulated fold change > 1.5 and 3 condition simulations per population and fold change are shown (72 simulations per boxplot).
+
+```{r sup-fig-scalability,  fig.cap="(ref:sup-fig-scalability)",   out.width = "500px",echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_memory.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-scalability) **Memory usage across the Milo analysis workflow.**
+Total memory usage across the steps of the Milo analysis workflow in 4 datasets containing different numbers of cells (Gastrulation: circles, Liver: triangles, Thymus: crosses, Simulation: squares). Grey points denote down-sampled datasets of the corresponding type. Coloured points denote the total number of cells for the respective dataset. Total memory usage (y-axis) is shown in megabytes (MB). (A) KNN graph building, (B) neighbourhood sampling and construction, (C) within-neighbourhood distance calculation, (D) cell counting in neighbourhoods according to the input experimental design, (E) differential abundance testing, (F) total in memory R object size. A fixed value was used in all datasets for graph building and neighbourhood construction (K=30).
+
+```{r sup-fig-thymus-nhoods,  fig.cap="(ref:sup-fig-thymus-nhoods)", echo=FALSE}
+knitr::include_graphics("suppl_figs/supp_figure_transferred-nhoods.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-thymus-nhoods) **Label transferred neighbourhood groups onto droplet scRNA-seq cells.** (A) Joint UMAP embedding for SMART-seq and droplet scRNA-seq datasets, points are coloured by label-transferred neighbourhood groups for the droplet scRNA-seq cells. (B) Proportions of label-transferred neighbourhood groups across mouse ages (n=3 replicates per age), corresponding to (A).
+
+
+```{r sup-fig-liver-endo,  fig.cap="(ref:sup-fig-liver-endo)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_endo.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-liver-endo) **Downstream analysis of disease-specific endothelial subpopulations in liver cirrhosis.**
+(A) GO term enrichment analysis on marker genes of cirrhosis-enriched endothelia. (B) GO term enrichment analysis on marker genes of healthy-enriched endothelia. The top 30 significant terms are shown.
+
+```{r sup-fig-liver-chol,  fig.cap="(ref:sup-fig-liver-chol)", echo=FALSE}
+knitr::include_graphics("suppl_figs/suppl_fig_chol.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-fig-liver-chol) **Downstream analysis of disease-specific cholangiocyte subpopulations in liver cirrhosis.**
+(A-B) UMAP embedding (A) and graph representation (B) of neighbourhoods of 3369 cells from cholangiocyte lineage.
+(C) Volcano plot for DGE test on cholangiocytes DA subpopulations: the x-axis shows the log-fold change between expression in cirrhotic and healthy cholangiocytes. The y-axis shows the -log10(adjusted p-value).
+(D) GO term enrichment analysis on marker genes of cirrhosis-enriched cholangiocytes. The top 20 significant terms are shown.
+
+\newpage
+
+# Supplementary tables {-}
+
+\renewcommand{\figurename}{Supplementary Table}
+\setcounter{figure}{0}  
+
+```{r sup-tab-2,  fig.cap="(ref:sup-tab-2)", echo=FALSE}
+knitr::include_graphics("suppl_tables/table_simulation_params.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-tab-2) **Summary of parameters used for DA simulations**
+
+```{r sup-tab-1,  fig.cap="(ref:sup-tab-1)", echo=FALSE}
+knitr::include_graphics("suppl_tables/table_methods_comparison.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-tab-1) **Qualitative comparison of evaluated methods for DA analysis**
+
+```{r sup-tab-3,  fig.cap="(ref:sup-tab-3)", echo=FALSE}
+knitr::include_graphics("suppl_tables/table_methods_params.pdf", auto_pdf = TRUE)
+```
+
+(ref:sup-tab-3) **Summary of parameters used for benchmarking of DA methods**
+
+
+
+\newpage
+

@@ -38,8 +38,8 @@ The Python packages needed are
 
 ## Data
 
-- Synthetic datasets and BCR-XL dataset are available under the `data` directory.
-- The COVID-19 PBMC dataset is available at https://www.covid19cellatlas.org/#wilk20.
+- Synthetic datasets are available under the `data` directory.
+- Real dataset are available at this [link](https://drive.google.com/drive/folders/15wWFD5FMe0VdzN1pUnaUUpQ17OXkeebH?usp=sharing).
 
 ## Usage
 

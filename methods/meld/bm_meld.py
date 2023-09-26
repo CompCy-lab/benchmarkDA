@@ -93,7 +93,8 @@ def runDA(args):
     meld_res = runMELD(adata, k=args.k, sample_col="synth_samples", label_col="synth_labels", beta=args.beta)
     run_time = time.time() - start_time
     # get da cells with different thresholds
-    lower = 1/len(adata.obs['synth_labels'].unique()) + 1e-8
+    # lower = 1/len(adata.obs['synth_labels'].unique()) + 1e-8
+    lower = meld_res.min() + 1e-8
     upper = meld_res.max() - 1e-8
     assert (lower < upper), \
         "lower bound is not less than upper bound"

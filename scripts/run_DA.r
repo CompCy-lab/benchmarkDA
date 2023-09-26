@@ -60,7 +60,7 @@ X_pca <- read_csv(str_c(data_dir, outprefix, "_batchEffect", be_sd, ".pca.csv"))
 ## cydar radius scaler picked w/ heuristic
 tol_dataset <- list(cluster=2.8, cluster_balanced=2.85, branch=2.4, linear=2.3, 'covid19-pbmc'=2.1, 'bcr-xl'=0.75,
                     test_scale_4000=1.2, test_scale_10000=1.2, test_scale_15000=1.2, test_scale_30000=1.2,
-                    test_scale_50000=1.2, test_scale_100000=1.2)
+                    test_scale_50000=1.2, test_scale_100000=1.2, pancreas=2.85, levine32=0.45)
 if (is.null(tol)) {
   tol <- 0.5
   if (!is.null(tol_dataset[[data_id]])) {
@@ -77,7 +77,9 @@ benchmark_params = list(
   louvain = list(k=k, resolution=resolution),
   louvain_batch = list(k=k, resolution=resolution),
   cydar = list(tol=tol, downsample=downsample),
-  cydar_batch = list(tol=tol, downsample=downsample)
+  cydar_batch = list(tol=tol, downsample=downsample),
+  monocle3 = list(k=k, resolution=resolution),
+  sclca = list(clust.max=15)
 )
 
 ## Run DA method ##

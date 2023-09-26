@@ -12,6 +12,8 @@ suppressPackageStartupMessages(
         library(cydar)
         library(pdist)
         library(reshape2)
+        library(monocle3)
+        library(scLCA)
     }
 )
 
@@ -289,6 +291,146 @@ louvain2output <- function(
   da.cell
 }
 
+run_monocle3_nbglm <- function(
+    sce,
+    condition_col,
+    sample_col,
+    reduced.dim="PCA",
+    d=30,
+    k=15,
+    resolution=1,
+    batch_col=NULL,
+    norm.method="TMM"
+){
+  ## Make design matrix
+  design_df <- as_tibble(colData(sce)[c(sample_col, condition_col, batch_col)]) %>%
+    distinct() %>%
+    dplyr::rename(sample=sample_col)
+  if (is.null(batch_col)) {
+    design <- formula(paste('~', condition_col, collapse = ' '))  
+  } else {
+    design <- formula(paste('~', batch_col, "+", condition_col, collapse = ' '))
+  }
+  
+  ## monocle3 clustering method
+  # X_red_dim = reducedDim(sce, reduced.dim)[,1:d]
+  # sce.graph <- buildKNNGraph(t(X_red_dim), k=k)
+  # louvain.clust <- cluster_louvain(sce.graph, resolution=resolution)
+  # message(str_c("#cluster: ", length(louvain.clust)))
+  # louvain.clust.ids <- membership(louvain.clust)
+
+  # create cell_data_set class from SingleCellExperiment
+  cds <- methods::new("cell_data_set",
+    assays = sce@assays,
+    colData = colData(sce),
+    int_elementMetadata = SingleCellExperiment::int_elementMetadata(sce),
+    int_colData = SingleCellExperiment::int_colData(sce),
+    int_metadata = SingleCellExperiment::int_metadata(sce),
+    metadata = S4Vectors::metadata(sce),
+    NAMES = NULL,
+    elementMetadata = elementMetadata(sce)[,0],
+    rowRanges = rowRanges(sce))
+  
+  ## monocle3 clustering method
+  reducedDim(cds, "PCA") <- reducedDim(cds, reduced.dim)[,1:d]
+  cds <- monocle3::cluster_cells(cds, reduction_method="PCA", k=k, resolution=resolution)
+  monocle3.clust.ids <- monocle3::clusters(cds, reduction_method="PCA")
+  
+  condition_vec <- colData(sce)[[condition_col]]
+  sample_labels <- colData(sce)[[sample_col]]
+  clust.df <- data.frame("cell_id"=colnames(sce), "Monocle3.Clust"=as.character(monocle3.clust.ids))
+  clust.df$Sample <- sample_labels
+  clust.df$Condition <- condition_vec
+  
+  monocle3.count <- table(clust.df$Monocle3.Clust, clust.df$Sample)
+  attributes(monocle3.count)$class <- "matrix"
+  
+  ## Test with same NB-GLM model as the Milo
+  if(norm.method %in% c("TMM")){
+    message("Using TMM normalisation")
+    dge <- DGEList(counts=monocle3.count,
+                   lib.size=colSums(monocle3.count))
+    dge <- calcNormFactors(dge, method="TMM")
+  } else if(norm.method %in% c("logMS")){
+    message("Using logMS normalisation")
+    dge <- DGEList(counts=monocle3.count,
+                   lib.size=colSums(monocle3.count))
+  }
+  
+  model <- model.matrix(design, data=design_df)
+  rownames(model) <- design_df$sample
+  model <- model[colnames(monocle3.count), ]
+  
+  dge <- estimateDisp(dge, model)
+  fit <- glmQLFit(dge, model, robust=TRUE)
+  n.coef <- ncol(model)
+  monocle3.res <- as.data.frame(topTags(glmQLFTest(fit, coef=n.coef), sort.by='none', n=Inf))
+  
+  clust.df$logFC <- monocle3.res[clust.df$Monocle3.Clust, 'logFC']
+  clust.df$FDR <- monocle3.res[clust.df$Monocle3.Clust, 'FDR']
+  return(clust.df)
+}
+
+run_sclca_nbglm <- function(
+    sce,
+    condition_col,
+    sample_col,
+    reduced.dim="PCA",
+    clust.max=10,
+    batch_col=NULL,
+    norm.method="TMM"
+){
+  ## Make design matrix
+  design_df <- as_tibble(colData(sce)[c(sample_col, condition_col, batch_col)]) %>%
+    distinct() %>%
+    dplyr::rename(sample=sample_col)
+  if (is.null(batch_col)) {
+    design <- formula(paste('~', condition_col, collapse = ' '))  
+  } else {
+    design <- formula(paste('~', batch_col, "+", condition_col, collapse = ' '))
+  }
+
+  ## scLCA clustering
+  count_mtx <- as.matrix(counts(sce))
+  sclca.clust.ids <- scLCA::myscLCA(count_mtx, clust.max=clust.max)[[1]]
+  
+  condition_vec <- colData(sce)[[condition_col]]
+  sample_labels <- colData(sce)[[sample_col]]
+  clust.df <- data.frame("cell_id"=colnames(sce), "scLCA.Clust"=as.character(sclca.clust.ids))
+  clust.df$Sample <- sample_labels
+  clust.df$Condition <- condition_vec
+  
+  sclca.count <- table(clust.df$scLCA.Clust, clust.df$Sample)
+  attributes(sclca.count)$class <- "matrix"
+  
+  ## Test with same NB-GLM model as the Milo
+  if(norm.method %in% c("TMM")){
+    message("Using TMM normalisation")
+    dge <- DGEList(counts=sclca.count,
+                   lib.size=colSums(sclca.count))
+    dge <- calcNormFactors(dge, method="TMM")
+  } else if(norm.method %in% c("logMS")){
+    message("Using logMS normalisation")
+    dge <- DGEList(counts=sclca.count,
+                   lib.size=colSums(sclca.count))
+  }
+  
+  model <- model.matrix(design, data=design_df)
+  rownames(model) <- design_df$sample
+  model <- model[colnames(sclca.count), ]
+  
+  dge <- estimateDisp(dge, model)
+  fit <- glmQLFit(dge, model)
+  n.coef <- ncol(model)
+  sclca.res <- as.data.frame(topTags(glmQLFTest(fit, coef=n.coef), sort.by='none', n=Inf))
+  
+  clust.df$logFC <- sclca.res[clust.df$scLCA.Clust, 'logFC']
+  clust.df$FDR <- sclca.res[clust.df$scLCA.Clust, 'FDR']
+  return(clust.df)
+}
+
+
+
 ### RUN BENCHMARK ###
 
 runDA <- function(
@@ -312,7 +454,7 @@ runDA <- function(
     stop(paste("Specify parameters for method", method))
   }
   ## Check valid method
-  if (!method %in% c("milo", "milo_batch", "louvain", 'daseq', "louvain_batch", 'cydar', 'cydar_batch')) {
+  if (!method %in% c("milo", "milo_batch", "louvain", 'daseq', "louvain_batch", 'cydar', 'cydar_batch', 'monocle3', 'sclca')) {
     stop("Unrecognized method")
   }
   
@@ -450,6 +592,44 @@ runDA <- function(
         bm.out[[i]]$runtime <- run_time
       }
     }
+  } else if (method == "monocle3") {
+    ## Run monocle3
+    start.time <- Sys.time()
+    monocle3_res <- run_monocle3_nbglm(sce, condition_col=condition_col, sample_col=sample_col, reduced.dim = "pca_batch",
+                                     d=d, k=params$monocle3$k, resolution=params$monocle3$resolution)
+    run_time <- as.numeric(Sys.time() - start.time, units="secs")
+    # get da.cells with different alphas
+    alphas <- quantile(monocle3_res$FDR, seq(1e-8, 1 - 1e-8, 0.01), names=FALSE)
+    da.cell <- louvain2output(monocle3_res, out_type=out_type, alphas=alphas)
+    if (out_type == "continuous"){
+      bm.out <- out2bm(da.cell, sce, method, run_time)
+    } else {
+      bm.out <- vector(mode="list", length = length(da.cell))
+      for (i in seq_len(length(da.cell))){
+        bm.out[[i]] <- calculate_outcome(out2bm(da.cell[[i]], sce, method))
+        bm.out[[i]]$alpha <- alphas[i]
+        bm.out[[i]]$runtime <- run_time
+      }
+    }
+  } else if (method == "sclca") {
+    ## Run monocle3
+    start.time <- Sys.time()
+    sclca_res <- run_sclca_nbglm(sce, condition_col=condition_col, sample_col=sample_col, reduced.dim = "pca_batch",
+                                    clust.max=params$sclca$clust.max)
+    run_time <- as.numeric(Sys.time() - start.time, units="secs")
+    # get da.cells with different alphas
+    alphas <- quantile(sclca_res$FDR, seq(1e-8, 1 - 1e-8, 0.01), names=FALSE)
+    da.cell <- louvain2output(sclca_res, out_type=out_type, alphas=alphas)
+    if (out_type == "continuous"){
+      bm.out <- out2bm(da.cell, sce, method, run_time)
+    } else {
+      bm.out <- vector(mode="list", length = length(da.cell))
+      for (i in seq_len(length(da.cell))){
+        bm.out[[i]] <- calculate_outcome(out2bm(da.cell[[i]], sce, method))
+        bm.out[[i]]$alpha <- alphas[i]
+        bm.out[[i]]$runtime <- run_time
+      }
+    }
   }
   
   ## Save results
@@ -505,6 +685,8 @@ calculate_outcome <- function(long_bm){
            FDR = FP/(TP+FP),
            Precision = TP/(TP+FP),
            Power = 1 - FNR,
+           F1 = (2 * TP) / (2 * TP + FP + FN),
+           MCC = ((TP * TN) - (FP * FN)) / ((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)), 
            Accuracy = (TP + TN)/(TP + TN + FP + FN)
     )
 }
